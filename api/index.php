@@ -42,9 +42,9 @@ if (in_array($type, ['song', 'playlist'])) {
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 
-include __DIR__ . '/vendor/autoload.php';
+// include __DIR__ . '/vendor/autoload.php';
 // you can use 'Meting.php' instead of 'autoload.php'
-// include __DIR__ . '/src/Meting.php';
+include __DIR__ . '/src/Meting.php';
 
 use Metowolf\Meting;
 
@@ -61,7 +61,7 @@ if ($type == 'playlist') {
     if (CACHE) {
         $file_path = __DIR__ . '/cache/playlist/' . $server . '_' . $id . '.json';
         if (file_exists($file_path)) {
-            if ($_SERVER['REQUEST_TIME'] - filectime($file_path) < CACHE_TIME) {
+            if ($_SERVER['REQUEST_TIME'] - filemtime($file_path) < CACHE_TIME) {
                 echo file_get_contents($file_path);
                 exit;
             }
@@ -137,7 +137,7 @@ if ($type == 'playlist') {
 
 function api_uri() // static
 {
-    return 'https://'  . $_SERVER['HTTP_HOST'] . strtok($_SERVER['REQUEST_URI'], '?');
+    return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'https://') . $_SERVER['HTTP_HOST'] . strtok($_SERVER['REQUEST_URI'], '?');
 }
 
 function auth($name)
@@ -160,7 +160,7 @@ function song2data($api, $song, $type, $id)
         case 'url':
             $m_url = json_decode($api->url($id, 320))->url;
             if ($m_url == '') break;
-            // url
+            // url format
             if ($api->server == 'netease') {
                 if ($m_url[4] != 's') $m_url = str_replace('http', 'https', $m_url);
             }
